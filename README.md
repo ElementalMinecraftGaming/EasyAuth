@@ -1,5 +1,7 @@
 # EasyAuth
-Authenticate your players
+Authenticate your players and if you want, disable xbox auth.
+
+[![](https://poggit.pmmp.io/shield.state/EasyAuth)](https://poggit.pmmp.io/p/EasyAuth)
 
 ## Commands
 
@@ -10,3 +12,11 @@ Authenticate your players
 /xena - Enables xbox auth
 
 ## Permissions
+
+x.dis - Disable xbox auth
+
+x.ena - Enable xbox auth
+
+## Credits
+
+ElementalMinecraftGaming / MrDevCat 'Discord'
