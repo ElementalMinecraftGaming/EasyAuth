@@ -1,0 +1,2 @@
+# EasyAuth
+Authenticate your players
