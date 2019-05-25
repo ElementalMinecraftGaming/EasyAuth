@@ -1,1 +1,37 @@
-//ToDo
+name: EasyAuth
+main: ElementalMinecraftGaming\EasyAuth\Main
+version: 1.0.0
+api: [3.7.2]
+load: POSTWORLD
+author: ElementalMinecraftGaming
+description: Profile Security!
+
+commands:
+ eregister:
+  description: Register!
+  permission: esign.up
+  aliases: [ereg]
+ esignin:
+  description: Sign in!
+  permission: esign.in
+  aliases: [elogin]
+ esafeset:
+  description: Register a safe word!
+  permission: esign.up
+  aliases: [essafe]
+ esafelogin:
+  description: Sign in with safe word!
+  permission: esign.in
+  aliases: [eslogin]
+ elogout:
+  description: Log out!
+  permission: esign.in
+  aliases: [logout]
+
+permissions:
+  esign.up:
+    default: true
+    description: Let's you register!
+  esign.in:
+    default: true
+    description: Let's you use login!
