@@ -7,26 +7,28 @@ author: ElementalMinecraftGaming
 description: Profile Security!
 
 commands:
- eregister:
+ register:
   description: Register!
   permission: esign.up
-  aliases: [ereg]
- esignin:
+  aliases: [reg]
+ signin:
   description: Sign in!
   permission: esign.in
-  aliases: [elogin]
- esafeset:
+  aliases: [login]
+ safeset:
   description: Register a safe word!
   permission: esign.up
   aliases: [essafe]
- esafelogin:
+ safelogin:
   description: Sign in with safe word!
   permission: esign.in
   aliases: [eslogin]
- elogout:
+ quit:
+  description: Leave the server!
+  permission: esign.up
+ logout:
   description: Log out!
   permission: esign.in
-  aliases: [logout]
 
 permissions:
   esign.up:
