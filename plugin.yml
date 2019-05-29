@@ -9,31 +9,31 @@ description: Profile Security!
 commands:
  register:
   description: Register!
-  permission: esign.up
+  permission: easyauth.signup
   aliases: [reg]
  signin:
   description: Sign in!
-  permission: esign.in
+  permission: easyauth.signin
   aliases: [login]
  safeset:
   description: Register a safe word!
-  permission: esign.up
+  permission: easyauth.signup
   aliases: [essafe]
  safelogin:
   description: Sign in with safe word!
-  permission: esign.in
+  permission: easyauth.signin
   aliases: [eslogin]
  quit:
   description: Leave the server!
-  permission: esign.up
+  permission: easyauth.signup
  logout:
   description: Log out!
-  permission: esign.in
+  permission: easyauth.signin
 
 permissions:
-  esign.up:
+  easyauth.signup:
     default: true
     description: Let's you register!
-  esign.in:
+  easyauth.signin:
     default: true
     description: Let's you use login!
