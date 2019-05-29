@@ -29,15 +29,15 @@ class Main extends PluginBase implements Listener
         $this->getServer()->getPluginManager()->registerEvents($this, $this);
     }
      public function auth($username, $pw) {
-        $ta = $this->db->query("SELECT pw FROM security WHERE player = '$username';");
-        $da = $ta->fetchArray(SQLITE3_ASSOC);
-        return $da["pw"];
+        $search = $this->db->query("SELECT pw FROM security WHERE player = '$username';");
+        $got = $search->fetchArray(SQLITE3_ASSOC);
+        return $got["pw"];
     }
     
     public function authh($username, $sw) {
-        $ta = $this->db->query("SELECT sw FROM securityy WHERE player = '$username';");
-        $da = $ta->fetchArray(SQLITE3_ASSOC);
-        return $da["sw"];
+        $search = $this->db->query("SELECT sw FROM securityy WHERE player = '$username';");
+        $got = $search->fetchArray(SQLITE3_ASSOC);
+        return $got["sw"];
     }
     
     public function playerRegistered($username)
@@ -79,19 +79,18 @@ class Main extends PluginBase implements Listener
     
      public function onCommand(CommandSender $sender, Command $command, string $label, array $args): bool {
          if (strtolower($command->getName()) == "signin") {
-            if ($sender->hasPermission("esign.in")) {
+            if ($sender->hasPermission("easyauth.signin")) {
                 if ($sender instanceof Player) {
                     if (isset($args[0])) {
                         if (!isset($this->loggedIn[$sender->getPlayer()->getName()])) {
                             $sender->sendMessage(TextFormat::YELLOW . "[" . TextFormat::RED . "EasyAuth" . TextFormat::YELLOW . "] " . TextFormat::GREEN . "Logging in...");
                             $player = $sender->getName();
                             $username = strtolower($player);
-                            $pw = $args[0];
-                            $can = $this->playerRegistered($username);
-                            if ($can == true) {
-                                $eat = $this->auth($username, $pw);
-                                $food = md5($pw);
-                                if ($food === $eat) {
+                            $password = $args[0];
+                            $checkname = $this->playerRegistered($username);
+                            if ($checkname == true) {
+                                $checkpw = $this->auth($username, $password);
+                                if (password_verify($password, $checkpw)) {
                                     $sender->sendMessage(TextFormat::YELLOW . "[" . TextFormat::RED . "EasyAuth" . TextFormat::YELLOW . "] " . TextFormat::GREEN . "Logged in!");
                                     $this->loggedIn[$sender->getName()] = true;
                                     return true;
@@ -117,19 +116,19 @@ class Main extends PluginBase implements Listener
         }
 
         if (strtolower($command->getName()) == "register") {
-            if ($sender->hasPermission("esign.up")) {
+            if ($sender->hasPermission("easyauth.signup")) {
                 if ($sender instanceof Player) {
                     if (isset($args[0])) {
                         $sender->sendMessage(TextFormat::YELLOW . "[" . TextFormat::RED . "EasyAuth" . TextFormat::YELLOW . "] " . TextFormat::GREEN . "Signing up...");
                         $player = $sender->getName();
                         $username = strtolower($player);
-                        $pw = md5($args[0]);
-                        $potato = $this->playerRegistered($username);
-                        if ($potato == false) {
+                        $pw = password_hash($args[0], TRUE);
+                        $checkname = $this->playerRegistered($username);
+                        if ($checkname == false) {
                             $del = $this->db->prepare("INSERT OR REPLACE INTO security (player, pw) VALUES (:player, :pw);");
                             $del->bindValue(":player", $username);
                             $del->bindValue(":pw", $pw);
-                            $tacos = $del->execute();
+                            $start = $del->execute();
                             $sender->sendMessage(TextFormat::YELLOW . "[" . TextFormat::RED . "EasyAuth" . TextFormat::YELLOW . "] " . TextFormat::GREEN . "Registered!");
                             $this->loggedIn[$sender->getName()] = true;
                             return true;
@@ -149,20 +148,20 @@ class Main extends PluginBase implements Listener
         }
 
         if (strtolower($command->getName()) == "safeset") {
-            if ($sender->hasPermission("esign.up")) {
+            if ($sender->hasPermission("easyauth.signup")) {
                 if ($sender instanceof Player) {
                     if (isset($args[0])) {
                         if (isset($this->loggedIn[$sender->getPlayer()->getName()])) {
                             $sender->sendMessage(TextFormat::YELLOW . "[" . TextFormat::RED . "EasyAuth" . TextFormat::YELLOW . "] " . TextFormat::GREEN . "Signing up...");
                             $player = $sender->getName();
                             $username = strtolower($player);
-                            $sw = md5($args[0]);
-                            $potato = $this->safeRegistered($username);
-                            if ($potato == false) {
+                            $sw = password_hash($args[0], TRUE);
+                            $checkname = $this->safeRegistered($username);
+                            if ($checkname == false) {
                                 $del = $this->db->prepare("INSERT OR REPLACE INTO securityy (player, sw) VALUES (:player, :sw);");
                                 $del->bindValue(":player", $username);
                                 $del->bindValue(":sw", $sw);
-                                $tacos = $del->execute();
+                                $start = $del->execute();
                                 $sender->sendMessage(TextFormat::YELLOW . "[" . TextFormat::RED . "EasyAuth" . TextFormat::YELLOW . "] " . TextFormat::GREEN . "Registered safe word!");
                                 $sender->sendMessage(TextFormat::YELLOW . "[" . TextFormat::RED . "EasyAuth" . TextFormat::YELLOW . "] " . TextFormat::GREEN . "It's recommended to sign out to make sure it worked!");
                                 return true;
@@ -185,19 +184,18 @@ class Main extends PluginBase implements Listener
         }
 
         if (strtolower($command->getName()) == "safelogin") {
-            if ($sender->hasPermission("esign.in")) {
+            if ($sender->hasPermission("easyauth.signin")) {
                 if ($sender instanceof Player) {
                     if (isset($args[0])) {
                         if (!isset($this->loggedIn[$sender->getPlayer()->getName()])) {
                             $sender->sendMessage(TextFormat::YELLOW . "[" . TextFormat::RED . "EasyAuth" . TextFormat::YELLOW . "] " . TextFormat::GREEN . "Logging in...");
                             $player = $sender->getName();
                             $username = strtolower($player);
-                            $sw = $args[0];
-                            $can = $this->safeRegistered($username);
-                            if ($can == true) {
-                                $pizza = md5($sw);
-                                $eat = $this->authh($username, $sw);
-                                if ($eat == $pizza) {
+                            $safeword = $args[0];
+                            $checkname = $this->safeRegistered($username);
+                            if ($checkname == true) {
+                                $checksw = $this->authh($username, $safeword);
+                                if (password_verify($safeword, $checksw)) {
                                     $sender->sendMessage(TextFormat::YELLOW . "[" . TextFormat::RED . "EasyAuth" . TextFormat::YELLOW . "] " . TextFormat::GREEN . "Logged in!");
                                     $this->loggedIn[$sender->getName()] = true;
                                     return true;
@@ -222,7 +220,7 @@ class Main extends PluginBase implements Listener
             }
         }
         if (strtolower($command->getName()) == "logout") {
-            if ($sender->hasPermission("esign.in")) {
+            if ($sender->hasPermission("easyauth.signin")) {
                 if ($sender instanceof Player) {
                         if (isset($this->loggedIn[$sender->getPlayer()->getName()])) {
                             $sender->sendMessage(TextFormat::YELLOW . "[" . TextFormat::RED . "EasyAuth" . TextFormat::YELLOW . "] " . TextFormat::GREEN . "Logging out...");
@@ -241,7 +239,7 @@ class Main extends PluginBase implements Listener
             }
         }
         if (strtolower($command->getName()) == "quit") {
-            if ($sender->hasPermission("esign.up")) {
+            if ($sender->hasPermission("easyauth.signup")) {
                 if ($sender instanceof Player) {
                         if (isset($this->loggedIn[$sender->getPlayer()->getName()])) {
                             $sender->sendMessage(TextFormat::YELLOW . "[" . TextFormat::RED . "EasyAuth" . TextFormat::YELLOW . "] " . TextFormat::GREEN . "Leave...");
