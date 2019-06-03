@@ -29,30 +29,38 @@ class Main extends PluginBase implements Listener
         $this->getServer()->getPluginManager()->registerEvents($this, $this);
     }
      public function auth($username, $pw) {
-        $search = $this->db->query("SELECT pw FROM security WHERE player = '$username';");
-        $got = $search->fetchArray(SQLITE3_ASSOC);
+        $search = $this->db->prepare("SELECT pw FROM security WHERE player = :player;");
+        $search->bindValue(":player", $username);
+        $start = $search->execute();
+	$got = $start->fetchArray(SQLITE3_ASSOC);
         return $got["pw"];
     }
     
     public function authh($username, $sw) {
-        $search = $this->db->query("SELECT sw FROM securityy WHERE player = '$username';");
-        $got = $search->fetchArray(SQLITE3_ASSOC);
+        $search = $this->db->prepare("SELECT sw FROM securityy WHERE player= :player;");
+        $search->bindValue(":player", $username);
+        $start = $search->execute();
+	$got = $start->fetchArray(SQLITE3_ASSOC);
         return $got["sw"];
     }
     
     public function playerRegistered($username)
 	{
 		$user = \SQLite3::escapeString($username);
-		$bongo = $this->db->query("SELECT * FROM security WHERE player='$user';");
-		$delta = $bongo->fetchArray(SQLITE3_ASSOC);
+		$search = $this->db->prepare("SELECT * FROM security WHERE player = :player;");
+                $search->bindValue(":player", $user);
+                $start = $search->execute();
+		$delta = $start->fetchArray(SQLITE3_ASSOC);
 		return empty($delta) == false;
 	}
         
         public function safeRegistered($username)
 	{
 		$user = \SQLite3::escapeString($username);
-		$bongo = $this->db->query("SELECT * FROM securityy WHERE player='$user';");
-		$delta = $bongo->fetchArray(SQLITE3_ASSOC);
+		$search = $this->db->prepare("SELECT * FROM securityy WHERE player = :player;");
+                $search->bindValue(":player", $user);
+                $start = $search->execute();
+		$delta = $start->fetchArray(SQLITE3_ASSOC);
 		return empty($delta) == false;
 	}
     
