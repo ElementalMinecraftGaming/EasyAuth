@@ -11,6 +11,14 @@ commands:
   description: Register!
   permission: easyauth.signup
   aliases: [reg]
+ changepw:
+  description: change password!
+  permission: easyauth.signup
+  aliases: [reg]
+ changesw:
+  description: change safe word!
+  permission: easyauth.signup
+  aliases: [reg]
  signin:
   description: Sign in!
   permission: easyauth.signin
