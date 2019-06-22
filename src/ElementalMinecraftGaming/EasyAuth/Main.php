@@ -159,6 +159,78 @@ class Main extends PluginBase implements Listener
                 return false;
             }
         }
+        
+        if (strtolower($command->getName()) == "changepw") {
+            if ($sender->hasPermission("easyauth.signup")) {
+                if ($sender instanceof Player) {
+                    if (isset($args[0])) {
+                        if (isset($this->loggedIn[$sender->getPlayer()->getName()])) {
+                            $sender->sendMessage($this->sResult("Changing Paswword..."));
+                            $player = $sender->getName();
+                            $username = strtolower($player);
+                            $pw = password_hash($args[0], TRUE);
+                            $checkname = $this->playerRegistered($username);
+                            if ($checkname == TRUE) {
+                                $del = $this->db->prepare("INSERT OR REPLACE INTO security (player, pw) VALUES (:player, :pw);");
+                                $del->bindValue(":player", $username);
+                                $del->bindValue(":pw", $pw);
+                                $start = $del->execute();
+                                $sender->sendMessage($this->sResult("Changed password!"));
+                                $this->loggedIn[$sender->getName()] = true;
+                                return true;
+                            } else {
+                                $sender->sendMessage($this->sResult("Account not registered!"));
+                            }
+                        } else {
+                            $sender->sendMessage($this->sResult("Log in first!"));
+                        }
+                    } else {
+                        $sender->sendMessage($this->sResult("Add password!"));
+                    }
+                } else {
+                    $sender->sendMessage($this->sResult("In-Game only!"));
+                }
+            } else {
+                $sender->sendMessage($this->sResult("No Permissions!"));
+                return false;
+            }
+        }
+
+        if (strtolower($command->getName()) == "changesw") {
+            if ($sender->hasPermission("easyauth.signup")) {
+                if ($sender instanceof Player) {
+                    if (isset($args[0])) {
+                        if (isset($this->loggedIn[$sender->getPlayer()->getName()])) {
+                            $sender->sendMessage($this->sResult("Signing up..."));
+                            $player = $sender->getName();
+                            $username = strtolower($player);
+                            $sw = password_hash($args[0], TRUE);
+                            $checkname = $this->safeRegistered($username);
+                            if ($checkname == true) {
+                                $del = $this->db->prepare("INSERT OR REPLACE INTO securityy (player, sw) VALUES (:player, :sw);");
+                                $del->bindValue(":player", $username);
+                                $del->bindValue(":sw", $sw);
+                                $start = $del->execute();
+                                $sender->sendMessage($this->sResult("Registered safe word!"));
+                                $sender->sendMessage($this->sResult("It's recommended to sign out to make sure it worked!"));
+                                return true;
+                            } else {
+                                $sender->sendMessage($this->sResult("Safe word not registered!"));
+                            }
+                        } else {
+                            $sender->sendMessage($this->sResult("Login/register first!"));
+                        }
+                    } else {
+                        $sender->sendMessage($this->sResult("Add safe word!"));
+                    }
+                } else {
+                    $sender->sendMessage($this->sResult("In-Game only!"));
+                }
+            } else {
+                $sender->sendMessage($this->sResult("No Permissions!"));
+                return false;
+            }
+        }
 
         if (strtolower($command->getName()) == "safeset") {
             if ($sender->hasPermission("easyauth.signup")) {
