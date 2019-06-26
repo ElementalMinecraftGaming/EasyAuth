@@ -322,26 +322,6 @@ class Main extends PluginBase implements Listener
                 return false;
             }
         }
-        if (strtolower($command->getName()) == "quit") {
-            if ($sender->hasPermission("easyauth.signup")) {
-                if ($sender instanceof Player) {
-                        if (isset($this->loggedIn[$sender->getPlayer()->getName()])) {
-                            unset($this->loggedIn[$sender->getPlayer()->getName()]);
-                            $sender->getPlayer()->kick("You quit", false);
-                            $player = $sender->getPlayer()->getName();
-                                    $this->getServer()->broadcastMessage($this->sResult("$player quit the game!"));
-                                    return true;
-                        } else {
-                            $sender->sendMessage($this->sResult("Your must be logged in to use this!"));
-                        }
-                } else {
-                    $sender->sendMessage($this->sResult("IN-GAME ONLY!"));
-                }
-            } else {
-                $sender->sendMessage($this->sResult("Invalid perms"));
-                return false;
-            }
-        }
         return false;
     }
 
