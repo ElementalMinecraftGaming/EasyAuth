@@ -31,9 +31,6 @@ commands:
   description: Sign in with safe word!
   permission: easyauth.signin
   aliases: [eslogin]
- quit:
-  description: Leave the server!
-  permission: easyauth.signup
  logout:
   description: Log out!
   permission: easyauth.signin
