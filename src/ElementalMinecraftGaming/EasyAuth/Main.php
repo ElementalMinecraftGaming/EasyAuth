@@ -28,42 +28,55 @@ class Main extends PluginBase implements Listener
         $this->config = new Config($this->getDataFolder() . "config.yml", Config::YAML);
         $this->getServer()->getPluginManager()->registerEvents($this, $this);
     }
-     public function auth($username, $pw) {
+
+    public function auth($username) {
         $search = $this->db->prepare("SELECT pw FROM security WHERE player = :player;");
         $search->bindValue(":player", $username);
         $start = $search->execute();
-	$got = $start->fetchArray(SQLITE3_ASSOC);
+        $got = $start->fetchArray(SQLITE3_ASSOC);
         return $got["pw"];
     }
-    
-    public function authh($username, $sw) {
+
+    public function registerAccount($username, $pw) {
+        $del = $this->db->prepare("INSERT OR REPLACE INTO security (player, pw) VALUES (:player, :pw);");
+        $del->bindValue(":player", $username);
+        $del->bindValue(":pw", $pw);
+        $start = $del->execute();
+    }
+
+    public function editSafeword($username, $sw) {
+        $del = $this->db->prepare("INSERT OR REPLACE INTO securityy (player, sw) VALUES (:player, :sw);");
+        $del->bindValue(":player", $username);
+        $del->bindValue(":sw", $sw);
+        $start = $del->execute();
+    }
+
+    public function authh($username) {
         $search = $this->db->prepare("SELECT sw FROM securityy WHERE player= :player;");
         $search->bindValue(":player", $username);
         $start = $search->execute();
-	$got = $start->fetchArray(SQLITE3_ASSOC);
+        $got = $start->fetchArray(SQLITE3_ASSOC);
         return $got["sw"];
     }
-    
-    public function playerRegistered($username)
-	{
-		$user = \SQLite3::escapeString($username);
-		$search = $this->db->prepare("SELECT * FROM security WHERE player = :player;");
-                $search->bindValue(":player", $user);
-                $start = $search->execute();
-		$delta = $start->fetchArray(SQLITE3_ASSOC);
-		return empty($delta) == false;
-	}
-        
-        public function safeRegistered($username)
-	{
-		$user = \SQLite3::escapeString($username);
-		$search = $this->db->prepare("SELECT * FROM securityy WHERE player = :player;");
-                $search->bindValue(":player", $user);
-                $start = $search->execute();
-		$delta = $start->fetchArray(SQLITE3_ASSOC);
-		return empty($delta) == false;
-	}
-    
+
+    public function playerRegistered($username) {
+        $user = \SQLite3::escapeString($username);
+        $search = $this->db->prepare("SELECT * FROM security WHERE player = :player;");
+        $search->bindValue(":player", $user);
+        $start = $search->execute();
+        $delta = $start->fetchArray(SQLITE3_ASSOC);
+        return empty($delta) == false;
+    }
+
+    public function safeRegistered($username) {
+        $user = \SQLite3::escapeString($username);
+        $search = $this->db->prepare("SELECT * FROM securityy WHERE player = :player;");
+        $search->bindValue(":player", $user);
+        $start = $search->execute();
+        $delta = $start->fetchArray(SQLITE3_ASSOC);
+        return empty($delta) == false;
+    }
+
     public function onMove(PlayerMoveEvent $event): bool {
         if (isset($this->loggedIn[$event->getPlayer()->getName()])) {
             return true;
@@ -73,25 +86,24 @@ class Main extends PluginBase implements Listener
         $event->setCancelled();
         return false;
     }
-    
+
     public function onQuit(PlayerQuitEvent $event) {
         if (isset($this->loggedIn[$event->getPlayer()->getName()])) {
             unset($this->loggedIn[$event->getPlayer()->getName()]);
         }
     }
-        
-        public function onJoin(PlayerJoinEvent $event) {
+
+    public function onJoin(PlayerJoinEvent $event) {
         $player = $event->getPlayer();
         $player->sendMessage($this->sResult("Please register or log in with: \n/reg {Password}\n/login {Password}\n/eslogin {SafeWord}\n/essafe {SafeWord}\n/logout\n/quit")) * 600;
     }
-    
-    public function sResult($string)
-	{
-			return TextFormat::YELLOW . "[" . TextFormat::RED . "EasyAuth" . TextFormat::YELLOW . "] " . TextFormat::GREEN . "$string";
-	}
-    
-     public function onCommand(CommandSender $sender, Command $command, string $label, array $args): bool {
-         if (strtolower($command->getName()) == "signin") {
+
+    public function sResult($string) {
+        return TextFormat::YELLOW . "[" . TextFormat::RED . "EasyAuth" . TextFormat::YELLOW . "] " . TextFormat::GREEN . "$string";
+    }
+
+    public function onCommand(CommandSender $sender, Command $command, string $label, array $args): bool {
+        if (strtolower($command->getName()) == "signin") {
             if ($sender->hasPermission("easyauth.signin")) {
                 if ($sender instanceof Player) {
                     if (isset($args[0])) {
@@ -138,10 +150,7 @@ class Main extends PluginBase implements Listener
                         $pw = password_hash($args[0], TRUE);
                         $checkname = $this->playerRegistered($username);
                         if ($checkname == false) {
-                            $del = $this->db->prepare("INSERT OR REPLACE INTO security (player, pw) VALUES (:player, :pw);");
-                            $del->bindValue(":player", $username);
-                            $del->bindValue(":pw", $pw);
-                            $start = $del->execute();
+                            $this->registerAccount($username, $pw);
                             $sender->sendMessage($this->sResult("Registered!"));
                             $this->loggedIn[$sender->getName()] = true;
                             return true;
@@ -159,7 +168,7 @@ class Main extends PluginBase implements Listener
                 return false;
             }
         }
-        
+
         if (strtolower($command->getName()) == "changepw") {
             if ($sender->hasPermission("easyauth.signup")) {
                 if ($sender instanceof Player) {
@@ -171,10 +180,7 @@ class Main extends PluginBase implements Listener
                             $pw = password_hash($args[0], TRUE);
                             $checkname = $this->playerRegistered($username);
                             if ($checkname == TRUE) {
-                                $del = $this->db->prepare("INSERT OR REPLACE INTO security (player, pw) VALUES (:player, :pw);");
-                                $del->bindValue(":player", $username);
-                                $del->bindValue(":pw", $pw);
-                                $start = $del->execute();
+                                $this->registerAccount($username, $pw);
                                 $sender->sendMessage($this->sResult("Changed password!"));
                                 $this->loggedIn[$sender->getName()] = true;
                                 return true;
@@ -207,10 +213,7 @@ class Main extends PluginBase implements Listener
                             $sw = password_hash($args[0], TRUE);
                             $checkname = $this->safeRegistered($username);
                             if ($checkname == true) {
-                                $del = $this->db->prepare("INSERT OR REPLACE INTO securityy (player, sw) VALUES (:player, :sw);");
-                                $del->bindValue(":player", $username);
-                                $del->bindValue(":sw", $sw);
-                                $start = $del->execute();
+                                $this->editSafeword($username, $sw);
                                 $sender->sendMessage($this->sResult("Registered safe word!"));
                                 $sender->sendMessage($this->sResult("It's recommended to sign out to make sure it worked!"));
                                 return true;
@@ -243,10 +246,7 @@ class Main extends PluginBase implements Listener
                             $sw = password_hash($args[0], TRUE);
                             $checkname = $this->safeRegistered($username);
                             if ($checkname == false) {
-                                $del = $this->db->prepare("INSERT OR REPLACE INTO securityy (player, sw) VALUES (:player, :sw);");
-                                $del->bindValue(":player", $username);
-                                $del->bindValue(":sw", $sw);
-                                $start = $del->execute();
+                                $this->editSafeword($username, $sw);
                                 $sender->sendMessage($this->sResult("Registered safe word!"));
                                 $sender->sendMessage($this->sResult("It's recommended to sign out to make sure it worked!"));
                                 return true;
@@ -307,13 +307,13 @@ class Main extends PluginBase implements Listener
         if (strtolower($command->getName()) == "logout") {
             if ($sender->hasPermission("easyauth.signin")) {
                 if ($sender instanceof Player) {
-                        if (isset($this->loggedIn[$sender->getPlayer()->getName()])) {
-                            unset($this->loggedIn[$sender->getPlayer()->getName()]);
-                                    $sender->sendMessage($this->sResult("Logged out!"));
-                                    return true;
-                        } else {
-                            $sender->sendMessage($this->sResult("Your not logged in"));
-                        }
+                    if (isset($this->loggedIn[$sender->getPlayer()->getName()])) {
+                        unset($this->loggedIn[$sender->getPlayer()->getName()]);
+                        $sender->sendMessage($this->sResult("Logged out!"));
+                        return true;
+                    } else {
+                        $sender->sendMessage($this->sResult("Your not logged in"));
+                    }
                 } else {
                     $sender->sendMessage($this->sResult("IN-GAME ONLY!"));
                 }
