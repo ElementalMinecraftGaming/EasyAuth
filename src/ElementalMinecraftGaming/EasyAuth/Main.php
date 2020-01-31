@@ -37,14 +37,16 @@ class Main extends PluginBase implements Listener
         return $got["pw"];
     }
 
-    public function registerAccount($username, $pw) {
+    public function registerAccount($username, $password) {
+        $pw = password_hash($password, TRUE);
         $del = $this->db->prepare("INSERT OR REPLACE INTO security (player, pw) VALUES (:player, :pw);");
         $del->bindValue(":player", $username);
         $del->bindValue(":pw", $pw);
         $start = $del->execute();
     }
 
-    public function editSafeword($username, $sw) {
+    public function editSafeword($username, $safeword) {
+        $sww = password_hash($safeword, TRUE);
         $del = $this->db->prepare("INSERT OR REPLACE INTO securityy (player, sw) VALUES (:player, :sw);");
         $del->bindValue(":player", $username);
         $del->bindValue(":sw", $sw);
@@ -82,7 +84,7 @@ class Main extends PluginBase implements Listener
             return true;
         }
         $player = $event->getPlayer();
-        $player->sendMessage($this->sResult("Please register or log in with: \n/reg {Password}\n/login {Password}\n/eslogin {SafeWord}\n/essafe {SafeWord}\n/logout\n/quit")) * 600;
+        $player->sendMessage($this->sResult("Please register or log in with: \n/reg {Password}\n/login {Password}\n/eslogin {SafeWord}\n/essafe {SafeWord}\n/logout")) * 6;
         $event->setCancelled();
         return false;
     }
@@ -115,7 +117,8 @@ class Main extends PluginBase implements Listener
                             $checkname = $this->playerRegistered($username);
                             if ($checkname == true) {
                                 $checkpw = $this->auth($username, $password);
-                                if (password_verify($password, $checkpw)) {
+								$verifyy = password_verify($password, $checkpw);
+                                if ($verifyy) {
                                     $sender->sendMessage($this->sResult("Logged in!"));
                                     $this->loggedIn[$sender->getName()] = true;
                                     return true;
@@ -147,7 +150,7 @@ class Main extends PluginBase implements Listener
                         $sender->sendMessage($this->sResult("Signing up..."));
                         $player = $sender->getName();
                         $username = strtolower($player);
-                        $pw = password_hash($args[0], TRUE);
+                        $pw = $args[0];
                         $checkname = $this->playerRegistered($username);
                         if ($checkname == false) {
                             $this->registerAccount($username, $pw);
@@ -177,7 +180,7 @@ class Main extends PluginBase implements Listener
                             $sender->sendMessage($this->sResult("Changing Paswword..."));
                             $player = $sender->getName();
                             $username = strtolower($player);
-                            $pw = password_hash($args[0], TRUE);
+                            $pw = $args[0];
                             $checkname = $this->playerRegistered($username);
                             if ($checkname == TRUE) {
                                 $this->registerAccount($username, $pw);
@@ -210,7 +213,7 @@ class Main extends PluginBase implements Listener
                             $sender->sendMessage($this->sResult("Signing up..."));
                             $player = $sender->getName();
                             $username = strtolower($player);
-                            $sw = password_hash($args[0], TRUE);
+                            $sw = $args[0];
                             $checkname = $this->safeRegistered($username);
                             if ($checkname == true) {
                                 $this->editSafeword($username, $sw);
@@ -243,7 +246,7 @@ class Main extends PluginBase implements Listener
                             $sender->sendMessage($this->sResult("Signing up..."));
                             $player = $sender->getName();
                             $username = strtolower($player);
-                            $sw = password_hash($args[0], TRUE);
+                            $sw = $args[0];
                             $checkname = $this->safeRegistered($username);
                             if ($checkname == false) {
                                 $this->editSafeword($username, $sw);
@@ -280,7 +283,8 @@ class Main extends PluginBase implements Listener
                             $checkname = $this->safeRegistered($username);
                             if ($checkname == true) {
                                 $checksw = $this->authh($username, $safeword);
-                                if (password_verify($safeword, $checksw)) {
+                                $verifyy = password_verify($safeword, $checksw);
+                                if ($verifyy) {
                                     $sender->sendMessage($this->sResult("Logged in!"));
                                     $this->loggedIn[$sender->getName()] = true;
                                     return true;
