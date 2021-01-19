@@ -1,7 +1,7 @@
 name: EasyAuth
 main: ElementalMinecraftGaming\EasyAuth\Main
 version: 1.0.0
-api: [3.7.2]
+api: [3.17.0]
 load: POSTWORLD
 author: ElementalMinecraftGaming
 description: Profile Security!
